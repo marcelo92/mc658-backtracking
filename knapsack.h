@@ -10,6 +10,7 @@
 #include<algorithm>
 #include<iostream>
 #include<set>
+#include <ctime>
 using namespace std;
 int read_knapsack(string);
 int show_usage();

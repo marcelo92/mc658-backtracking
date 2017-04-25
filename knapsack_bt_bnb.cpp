@@ -102,6 +102,7 @@ bool bnb_rec(int n, int d, int B, vector<int> &p, vector<int> &w, vector<int> &c
 
     return true;
 }
+
 int space_left(int i, int d, int B, vector<int> &w, vector<int> &c, set<int> &classes) {
     //Nova classe
     if (classes.find(c[i]) == classes.end()) {
@@ -154,12 +155,14 @@ void copy_vector(int n, int l, vector<int> &origem, vector<int> &dest) {
     }
 }
 
-bool compare (float *i,float *j) { return (*i>*j); }
+bool compare(float *i, float *j) {
+    return (*i>*j);
+}
 
 void sort_vectors_positions(int n, vector<int> &new_positions, vector<int> &p, vector<int> &w) {
     vector<float*> w_ref(n);
     vector<float> valor(n);
-    
+
     for (int i = 0; i < n; i++) {
         valor[i] = float(p[i]) / float(w[i]);
         w_ref[i] = &valor[i];
@@ -168,7 +171,7 @@ void sort_vectors_positions(int n, vector<int> &new_positions, vector<int> &p, v
     sort(w_ref.begin(), w_ref.end(), compare);
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            if (*w_ref[i] == (float(p[j]) / float(w[j]))){
+            if (*w_ref[i] == (float(p[j]) / float(w[j]))) {
                 new_positions[i] = j;
                 break;
             }
@@ -185,10 +188,15 @@ void sort_vectors(int n, vector<int> &v1, vector<int> &v2, vector<int> &new_posi
 ///
 // Branch and Bound function
 ///
+
 bool bnb(int n, int d, int B, vector<int> &p, vector<int> &w, vector<int> &c, vector<int> &sol, int t) {
+    bool time_over = false;
+    clock_t begin, end;
+    double elapsed_secs;
+    
     vector<int> new_positions(n);
     sort_vectors_positions(n, new_positions, p, w);
-    
+
     vector<int> w2(n), p2(n), c2(n);
     sort_vectors(n, w, w2, new_positions);
     sort_vectors(n, p, p2, new_positions);
@@ -203,8 +211,8 @@ bool bnb(int n, int d, int B, vector<int> &p, vector<int> &w, vector<int> &c, ve
         sol_final[i] = 0;
     }
 
-    
-    
+    begin = clock();
+
     int sol1, sol2, new_B = B, B_temp;
     for (int i = 0; i < n; i++) {
         sol1 = sol2 = 0;
@@ -242,14 +250,31 @@ bool bnb(int n, int d, int B, vector<int> &p, vector<int> &w, vector<int> &c, ve
         //Limpo as classes para estado da solucao encontrada ate o momento
         classes_1 = set<int> (classes);
         classes_2 = set<int> (classes);
+
+        end = clock();
+        elapsed_secs = double(end - begin) / CLOCKS_PER_SEC ;
+        if (elapsed_secs > double(t)) {
+            time_over = true;
+            break;
+        }
     }
-    
+
     //Reorganiza vetor de saida para ordem incial do problema
     vector<int> sol_aux(n);
     for (int i = 0; i < n; i++) {
         sol_aux[new_positions[i]] = sol_final[i];
     }
     copy_vector(n, n, sol_aux, sol);
+
+    
+    if (!time_over) {
+        end = clock();
+        elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+        cout << "Time(s): " << elapsed_secs << "\n";
+    } else {
+        cout << "Time over " << elapsed_secs << "\n";
+    }
+    
     return true;
 
     //vector<int> sol_temp(n);
